@@ -8,6 +8,9 @@
     <title>PetCare | Gestión Veterinaria</title>
     <link rel="stylesheet" href="/css/styles.css">
     <script src="/js/app.js" defer></script>
+    <script src="/js/reservas.js" defer></script>
+    <script src="/js/atenciones.js" defer></script>
+    <script src="/js/externos.js" defer></script>
 </head>
 <body>
 
@@ -34,6 +37,26 @@
                     data-vista="mascotas">
                 Mascotas
             </button>
+
+            <button class="menu-item"
+                    data-vista="veterinarios">
+                Veterinarios y horarios
+            </button>
+
+            <button class="menu-item" data-vista="reservas">
+                Reservas
+            </button>
+
+            <button class="menu-item" data-vista="atenciones">
+                Atenciones e historial
+            </button>
+
+            <button class="menu-item" data-vista="externos">
+                Medicamentos y ubicación
+            </button>
+
+
+
         </nav>
 
         <div class="menu-pie">
@@ -243,6 +266,450 @@
 
                         <tbody id="tabla-mascotas"></tbody>
                     </table>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- VETERINARIOS Y HORARIOS -->
+        <section id="vista-veterinarios" class="vista" hidden>
+
+            <div class="titulo-seccion">
+                <div>
+                    <h2>Veterinarios y horarios</h2>
+                    <p>Administra el personal veterinario y sus jornadas.</p>
+                </div>
+                <span class="contador" id="total-veterinarios">
+            0 veterinarios
+        </span>
+            </div>
+
+            <div class="panel">
+                <h3 id="titulo-form-vet">Registrar veterinario</h3>
+
+                <form id="form-vet">
+                    <input type="hidden" id="vet-id">
+
+                    <div class="campos">
+                        <label>
+                            Nombre completo
+                            <input name="nombre" required maxlength="150">
+                        </label>
+
+                        <label>
+                            Especialidad
+                            <input name="especialidad" required
+                                   maxlength="100">
+                        </label>
+
+                        <label>
+                            Correo electrónico
+                            <input name="correo" type="email"
+                                   required maxlength="150">
+                        </label>
+
+                        <label>
+                            Teléfono
+                            <input name="telefono" maxlength="20">
+                        </label>
+                    </div>
+
+                    <div class="acciones-form">
+                        <button class="boton principal" type="submit">
+                            Guardar veterinario
+                        </button>
+                        <button class="boton secundario" type="button"
+                                id="limpiar-vet">
+                            Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h3>Veterinarios registrados</h3>
+                <div class="tabla-contenedor">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Especialidad</th>
+                            <th>Correo</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabla-veterinarios"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Asignar horario</h3>
+
+                <label class="selector-cliente">
+                    Veterinario
+                    <select id="horario-veterinario">
+                        <option value="">Seleccionar veterinario</option>
+                    </select>
+                </label>
+
+                <form id="form-horario">
+                    <div class="campos">
+                        <label>
+                            Día de la semana
+                            <select name="diaSemana" required>
+                                <option value="MONDAY">Lunes</option>
+                                <option value="TUESDAY">Martes</option>
+                                <option value="WEDNESDAY">Miércoles</option>
+                                <option value="THURSDAY">Jueves</option>
+                                <option value="FRIDAY">Viernes</option>
+                                <option value="SATURDAY">Sábado</option>
+                                <option value="SUNDAY">Domingo</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Hora de inicio
+                            <input name="horaInicio" type="time" required>
+                        </label>
+
+                        <label>
+                            Hora de término
+                            <input name="horaFin" type="time" required>
+                        </label>
+                    </div>
+
+                    <div class="acciones-form">
+                        <button class="boton principal" type="submit">
+                            Asignar horario
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h3>Horarios del veterinario</h3>
+                <div class="tabla-contenedor">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Día</th>
+                            <th>Inicio</th>
+                            <th>Término</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tabla-horarios"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RESERVAS -->
+        <section id="vista-reservas" class="vista" hidden>
+
+            <div class="titulo-seccion">
+                <div>
+                    <h2>Gestión de reservas</h2>
+                    <p>Consulta disponibilidad y administra citas veterinarias.</p>
+                </div>
+                <span class="contador" id="res-total">0 reservas</span>
+            </div>
+
+            <div class="panel">
+                <h3 id="res-titulo">Registrar reserva</h3>
+
+                <form id="res-form">
+                    <input type="hidden" id="res-edicion-id">
+
+                    <div class="campos">
+                        <label>
+                            Propietario
+                            <select id="res-cliente" required></select>
+                        </label>
+
+                        <label>
+                            Mascota
+                            <select id="res-mascota" required></select>
+                        </label>
+
+                        <label>
+                            Veterinario
+                            <select id="res-veterinario" required></select>
+                        </label>
+
+                        <label>
+                            Fecha
+                            <input type="date" id="res-fecha" required>
+                        </label>
+
+                        <label>
+                            Hora disponible
+                            <select id="res-hora" required></select>
+                        </label>
+
+                        <label>
+                            Motivo de consulta
+                            <input id="res-motivo"
+                                   maxlength="500"
+                                   placeholder="Ej.: Control general"
+                                   required>
+                        </label>
+                    </div>
+
+                    <p class="texto-ayuda" id="res-disponibilidad">
+                        Selecciona un veterinario y una fecha.
+                    </p>
+
+                    <div class="acciones-form">
+                        <button class="boton principal"
+                                id="res-guardar" type="submit">
+                            Registrar reserva
+                        </button>
+
+                        <button class="boton secundario"
+                                id="res-limpiar" type="button">
+                            Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h3>Reservas registradas</h3>
+
+                <label class="selector-cliente">
+                    Filtrar por propietario
+                    <select id="res-filtro-cliente">
+                        <option value="">Todos los clientes</option>
+                    </select>
+                </label>
+
+                <div class="tabla-contenedor tabla-alta">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Cliente</th>
+                            <th>Mascota</th>
+                            <th>Veterinario</th>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody id="res-tabla"></tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ATENCIONES E HISTORIAL -->
+        <section id="vista-atenciones" class="vista" hidden>
+
+            <div class="titulo-seccion">
+                <div>
+                    <h2>Atenciones médicas</h2>
+                    <p>Registra consultas y revisa el historial clínico.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Seleccionar paciente</h3>
+
+                <div class="campos">
+                    <label>
+                        Propietario
+                        <select id="ate-cliente"></select>
+                    </label>
+
+                    <label>
+                        Mascota
+                        <select id="ate-mascota"></select>
+                    </label>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Registrar atención médica</h3>
+
+                <form id="ate-form">
+
+                    <label>
+                        Reserva confirmada
+                        <select id="ate-reserva" required></select>
+                    </label>
+
+                    <p id="ate-ayuda" class="texto-ayuda"></p>
+
+                    <div class="campos">
+                        <label>
+                            Diagnóstico
+                            <textarea id="ate-diagnostico"
+                                      maxlength="2000"
+                                      rows="4"
+                                      required></textarea>
+                        </label>
+
+                        <label>
+                            Tratamiento
+                            <textarea id="ate-tratamiento"
+                                      maxlength="4000"
+                                      rows="4"
+                                      required></textarea>
+                        </label>
+                    </div>
+
+                    <h3 class="subtitulo">Medicamento prescrito (opcional)</h3>
+
+                    <div class="campos">
+                        <label>
+                            Nombre del medicamento
+                            <input id="ate-med-nombre"
+                                   maxlength="150">
+                        </label>
+
+                        <label>
+                            Dosis
+                            <input id="ate-med-dosis"
+                                   maxlength="100"
+                                   placeholder="Ej.: 1 comprimido">
+                        </label>
+
+                        <label>
+                            Frecuencia
+                            <input id="ate-med-frecuencia"
+                                   maxlength="100"
+                                   placeholder="Ej.: Cada 12 horas">
+                        </label>
+
+                        <label>
+                            Duración (días)
+                            <input id="ate-med-duracion"
+                                   type="number"
+                                   min="1">
+                        </label>
+
+                        <label>
+                            Indicaciones
+                            <textarea id="ate-med-indicaciones"
+                                      maxlength="500"
+                                      rows="3"></textarea>
+                        </label>
+                    </div>
+
+                    <div class="acciones-form">
+                        <button id="ate-guardar"
+                                class="boton principal"
+                                type="submit">
+                            Registrar atención
+                        </button>
+
+                        <button class="boton secundario"
+                                id="ate-limpiar"
+                                type="reset">
+                            Limpiar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="panel">
+                <h3>Historial clínico de la mascota</h3>
+
+                <button class="boton secundario"
+                        id="ate-actualizar"
+                        type="button">
+                    Actualizar historial
+                </button>
+
+                <div id="ate-historial" class="historial-lista">
+                    Selecciona una mascota para ver su historial.
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- MEDICAMENTOS Y UBICACION -->
+        <section id="vista-externos" class="vista" hidden>
+
+            <div class="titulo-seccion">
+                <div>
+                    <h2>Medicamentos y ubicación</h2>
+                    <p>Consulta información externa y encuentra nuestra clínica.</p>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Consultar medicamentos</h3>
+
+                <form id="ext-form-medicamentos">
+                    <label>
+                        Nombre del medicamento
+                        <input
+                                id="ext-nombre"
+                                type="search"
+                                placeholder="Ej.: Amoxicilina"
+                                maxlength="100"
+                                required>
+                    </label>
+
+                    <div class="acciones-form">
+                        <button class="boton principal" type="submit">
+                            Buscar medicamento
+                        </button>
+                    </div>
+                </form>
+
+                <p id="ext-med-estado" class="texto-ayuda">
+                    Ingresa un nombre para realizar una búsqueda.
+                </p>
+
+                <div class="tabla-contenedor">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Medicamento</th>
+                            <th>Categoría</th>
+                            <th>Advertencia</th>
+                        </tr>
+                        </thead>
+                        <tbody id="ext-med-tabla"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>Ubicación de la veterinaria</h3>
+
+                <div id="ext-ubicacion-info">
+                    Cargando ubicación...
+                </div>
+
+                <div class="ext-mapa">
+                    <iframe
+                            id="ext-mapa"
+                            title="Mapa de ubicación de la veterinaria"
+                            loading="lazy">
+                    </iframe>
+                </div>
+
+                <div class="acciones-form">
+                    <a
+                            id="ext-mapa-enlace"
+                            class="boton secundario"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            hidden>
+                        Abrir mapa completo
+                    </a>
                 </div>
             </div>
 

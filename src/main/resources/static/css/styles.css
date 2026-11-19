@@ -319,3 +319,142 @@ td {
         flex-wrap: wrap;
     }
 }
+
+/* Notificaciones visibles en cualquier parte de la pagina */
+.mensaje {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    z-index: 9999;
+    max-width: 420px;
+    width: calc(100% - 50px);
+    padding: 18px 22px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.mensaje.error {
+    background: #fff0f0;
+    color: #a82030;
+    border-left: 5px solid #dc3545;
+}
+
+.mensaje:not(.error) {
+    background: #e8f7f1;
+    color: #075b4a;
+    border-left: 5px solid #087f65;
+}
+
+
+/* Reservas y atenciones */
+
+textarea {
+    width: 100%;
+    padding: 12px 13px;
+    border: 1px solid #cfded9;
+    border-radius: 9px;
+    color: var(--texto);
+    font: inherit;
+    resize: vertical;
+    outline-color: var(--verde);
+}
+
+.texto-ayuda {
+    margin-top: 17px;
+    color: var(--gris);
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.tabla-alta {
+    max-height: 440px;
+    overflow: auto;
+    margin-top: 20px;
+}
+
+.estado-reserva {
+    display: inline-block;
+    padding: 7px 10px;
+    background: var(--verde-claro);
+    color: var(--verde-oscuro);
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.subtitulo {
+    margin-top: 30px !important;
+}
+
+.historial-lista {
+    margin-top: 22px;
+}
+
+.historial-item {
+    border: 1px solid var(--borde);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    background: #fbfefd;
+}
+
+.historial-item h4 {
+    margin-top: 0;
+    color: var(--verde-oscuro);
+}
+
+.historial-item p,
+.historial-item li {
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+
+/* Medicamentos y ubicación */
+
+#ext-ubicacion-info {
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+#ext-ubicacion-info h4 {
+    color: var(--verde-oscuro);
+    font-size: 19px;
+    margin-bottom: 8px;
+}
+
+#ext-ubicacion-info p {
+    color: var(--gris);
+    margin: 5px 0;
+}
+
+.ext-mapa {
+    width: 100%;
+    border: 1px solid var(--borde);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #edf3f1;
+}
+
+.ext-mapa iframe {
+    display: block;
+    width: 100%;
+    height: 430px;
+    border: none;
+}
+
+#ext-mapa-enlace {
+    display: inline-block;
+    text-decoration: none;
+}
+
+#ext-mapa-enlace[hidden] {
+    display: none;
+}

@@ -22,14 +22,19 @@ async function api(ruta, metodo = "GET", datos = null) {
     const resultado = await respuesta.json()
         .catch(() => null);
 
+
     if (!respuesta.ok) {
-        throw new Error(
+        const error = new Error(
             resultado?.detail ||
             resultado?.message ||
             resultado?.error ||
             `Error HTTP ${respuesta.status}`
         );
+
+        error.status = respuesta.status;
+        throw error;
     }
+
 
     return resultado;
 }
@@ -452,3 +457,251 @@ cargarClientes().catch(error => {
         true
     );
 });
+
+/* ================================
+   VETERINARIOS Y HORARIOS
+================================ */
+
+let veterinarios = [];
+let horarios = [];
+
+const dias = {
+    MONDAY: "Lunes",
+    TUESDAY: "Martes",
+    WEDNESDAY: "Miércoles",
+    THURSDAY: "Jueves",
+    FRIDAY: "Viernes",
+    SATURDAY: "Sábado",
+    SUNDAY: "Domingo"
+};
+
+function limpiarVet() {
+    $("#form-vet").reset();
+    $("#vet-id").value = "";
+    $("#titulo-form-vet").textContent = "Registrar veterinario";
+}
+
+async function cargarVeterinarios() {
+    veterinarios = await api("/api/veterinarios");
+
+    $("#total-veterinarios").textContent =
+        `${veterinarios.length} veterinarios`;
+
+    $("#tabla-veterinarios").innerHTML =
+        veterinarios.length
+            ? veterinarios.map(v => `
+                <tr>
+                    <td>${v.id}</td>
+                    <td>${escapar(v.nombre)}</td>
+                    <td>${escapar(v.especialidad)}</td>
+                    <td>${escapar(v.correo)}</td>
+                    <td>${escapar(v.telefono || "-")}</td>
+                    <td>
+                        <button class="boton secundario pequeno"
+                                data-accion="editar-vet"
+                                data-id="${v.id}">
+                            Editar
+                        </button>
+                        <button class="boton peligro pequeno"
+                                data-accion="desactivar-vet"
+                                data-id="${v.id}">
+                            Desactivar
+                        </button>
+                    </td>
+                </tr>
+            `).join("")
+            : '<tr><td colspan="6">Sin veterinarios registrados</td></tr>';
+
+    const selector = $("#horario-veterinario");
+    const seleccionado = selector.value;
+
+    selector.replaceChildren(
+        new Option("Seleccionar veterinario", "")
+    );
+
+    veterinarios.forEach(v => {
+        selector.add(new Option(v.nombre, String(v.id)));
+    });
+
+    if (veterinarios.some(v => String(v.id) === seleccionado)) {
+        selector.value = seleccionado;
+    } else if (veterinarios.length) {
+        selector.value = String(veterinarios[0].id);
+    }
+
+    await cargarHorarios();
+}
+
+$("#form-vet").addEventListener("submit", async evento => {
+    evento.preventDefault();
+
+    const form = evento.currentTarget;
+    const datos = Object.fromEntries(new FormData(form));
+    const id = $("#vet-id").value;
+
+    try {
+        const resultado = await api(
+            id ? `/api/veterinarios/${id}` : "/api/veterinarios",
+            id ? "PUT" : "POST",
+            datos
+        );
+
+        limpiarVet();
+        await cargarVeterinarios();
+
+        if (!id && resultado?.id) {
+            $("#horario-veterinario").value =
+                String(resultado.id);
+            await cargarHorarios();
+        }
+
+        mensaje(id
+            ? "Veterinario actualizado."
+            : "Veterinario registrado.");
+
+    } catch (error) {
+        mensaje(error.message, true);
+    }
+});
+
+$("#limpiar-vet").addEventListener("click", limpiarVet);
+
+$("#tabla-veterinarios").addEventListener("click", async evento => {
+    const boton = evento.target.closest("[data-accion]");
+    if (!boton) return;
+
+    const id = Number(boton.dataset.id);
+    const vet = veterinarios.find(v => v.id === id);
+    if (!vet) return;
+
+    if (boton.dataset.accion === "editar-vet") {
+        const form = $("#form-vet");
+
+        $("#vet-id").value = vet.id;
+        form.elements.nombre.value = vet.nombre;
+        form.elements.especialidad.value = vet.especialidad;
+        form.elements.correo.value = vet.correo;
+        form.elements.telefono.value = vet.telefono || "";
+
+        $("#titulo-form-vet").textContent = "Editar veterinario";
+        form.scrollIntoView({ behavior: "smooth" });
+    }
+
+    if (boton.dataset.accion === "desactivar-vet") {
+        if (!confirm(`¿Desactivar a ${vet.nombre}?`)) return;
+
+        try {
+            await api(`/api/veterinarios/${id}`, "DELETE");
+            limpiarVet();
+            await cargarVeterinarios();
+            mensaje("Veterinario desactivado.");
+        } catch (error) {
+            mensaje(error.message, true);
+        }
+    }
+});
+
+/* HORARIOS */
+
+async function cargarHorarios() {
+    const id = $("#horario-veterinario").value;
+
+    horarios = id
+        ? await api(`/api/veterinarios/${id}/horarios`)
+        : [];
+
+    $("#tabla-horarios").innerHTML =
+        horarios.length
+            ? horarios.map(h => `
+                <tr>
+                    <td>${h.id}</td>
+                    <td>${escapar(dias[h.diaSemana] || h.diaSemana)}</td>
+                    <td>${escapar(h.horaInicio)}</td>
+                    <td>${escapar(h.horaFin)}</td>
+                    <td>
+                        <button class="boton peligro pequeno"
+                                data-accion="desactivar-horario"
+                                data-id="${h.id}">
+                            Desactivar
+                        </button>
+                    </td>
+                </tr>
+            `).join("")
+            : '<tr><td colspan="5">Sin horarios asignados</td></tr>';
+}
+
+$("#horario-veterinario").addEventListener(
+    "change",
+    async () => {
+        try {
+            await cargarHorarios();
+        } catch (error) {
+            mensaje(error.message, true);
+        }
+    }
+);
+
+$("#form-horario").addEventListener("submit", async evento => {
+    evento.preventDefault();
+
+    const veterinarioId = $("#horario-veterinario").value;
+
+    if (!veterinarioId) {
+        mensaje("Selecciona un veterinario.", true);
+        return;
+    }
+
+    const form = evento.currentTarget;
+    const datos = Object.fromEntries(new FormData(form));
+
+    try {
+        await api(
+            `/api/veterinarios/${veterinarioId}/horarios`,
+            "POST",
+            datos
+        );
+
+        form.reset();
+        await cargarHorarios();
+        mensaje("Horario asignado correctamente.");
+
+
+    } catch (error) {
+        if (error.status === 409) {
+            mensaje(
+                "No se puede asignar este horario porque " +
+                "se superpone con otro horario del veterinario. " +
+                "Selecciona un intervalo diferente.",
+                true
+            );
+        } else {
+            mensaje(error.message, true);
+        }
+    }
+
+});
+
+$("#tabla-horarios").addEventListener("click", async evento => {
+    const boton = evento.target.closest(
+        '[data-accion="desactivar-horario"]'
+    );
+
+    if (!boton) return;
+
+    if (!confirm("¿Desactivar este horario?")) return;
+
+    try {
+        await api(`/api/horarios/${boton.dataset.id}`, "DELETE");
+        await cargarHorarios();
+        mensaje("Horario desactivado.");
+    } catch (error) {
+        mensaje(error.message, true);
+    }
+});
+
+$('.menu-item[data-vista="veterinarios"]')
+    .addEventListener("click", () => {
+        cargarVeterinarios().catch(error => {
+            mensaje(error.message, true);
+        });
+    });
