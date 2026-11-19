@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,18 +32,22 @@ public class ReservaService {
     private final MascotaRepository mascotaRepository;
     private final VeterinarioRepository veterinarioRepository;
     private final HorarioVeterinarioRepository horarioRepository;
+    private final ApplicationEventPublisher publicadorEventos;
 
     public ReservaService(
             ReservaRepository reservaRepository,
             MascotaRepository mascotaRepository,
             VeterinarioRepository veterinarioRepository,
-            HorarioVeterinarioRepository horarioRepository) {
+            HorarioVeterinarioRepository horarioRepository,
+            ApplicationEventPublisher publicadorEventos) {
 
         this.reservaRepository = reservaRepository;
         this.mascotaRepository = mascotaRepository;
         this.veterinarioRepository = veterinarioRepository;
         this.horarioRepository = horarioRepository;
+        this.publicadorEventos = publicadorEventos;
     }
+
 
     // RF-05 y RF-06: Registrar reserva sin duplicaciones
     @Transactional
@@ -260,10 +265,30 @@ public class ReservaService {
             );
         }
 
+
         reserva.setEstado(nuevo);
 
-        // La notificacion externa se integrara en el bloque de APIs.
-        return convertir(reservaRepository.save(reserva));
+        ReservaResponse respuesta =
+                convertir(reservaRepository.save(reserva));
+
+        if (nuevo == EstadoReserva.CONFIRMADA
+                || nuevo == EstadoReserva.CANCELADA) {
+
+            publicadorEventos.publishEvent(
+                    new ReservaEstadoCambiadoEvento(
+                            reserva.getId(),
+                            reserva.getMascota()
+                                    .getCliente()
+                                    .getCorreo(),
+                            nuevo.name(),
+                            reserva.getFecha(),
+                            reserva.getHora()
+                    )
+            );
+        }
+
+        return respuesta;
+
     }
 
     // Consultas de reservas
